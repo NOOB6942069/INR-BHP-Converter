@@ -1,0 +1,45 @@
+import tkinter as tk
+from tkinter import messagebox
+
+def calculate_inr_per_bhp():
+    try:
+        cost_in_inr = float(entry_cost.get()) * 100000  # converting lakhs to INR
+        bhp = float(entry_bhp.get())
+        if bhp == 0:
+            raise ValueError("BHP cannot be zero")
+        inr_per_bhp = cost_in_inr / bhp
+        label_result.config(text=f"INR per BHP is: {inr_per_bhp:.2f}")
+    except ValueError as e:
+        messagebox.showerror("Input Error", str(e))
+
+# Create the main window
+root = tk.Tk()
+root.title("INR/BHP Calculator")
+root.geometry("400x300")
+root.configure(bg="#f0f0f0")
+
+# Create and place the cost label and entry
+frame = tk.Frame(root, bg="#f0f0f0")
+frame.pack(pady=20)
+
+label_cost = tk.Label(frame, text="Enter the cost in INR (in lakhs):", bg="#f0f0f0")
+label_cost.grid(row=0, column=0, padx=10, pady=10, sticky="e")
+entry_cost = tk.Entry(frame)
+entry_cost.grid(row=0, column=1, padx=10, pady=10)
+
+# Create and place the BHP label and entry
+label_bhp = tk.Label(frame, text="Enter the BHP:", bg="#f0f0f0")
+label_bhp.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+entry_bhp = tk.Entry(frame)
+entry_bhp.grid(row=1, column=1, padx=10, pady=10)
+
+# Create and place the calculate button
+button_calculate = tk.Button(root, text="Calculate", command=calculate_inr_per_bhp, bg="#4CAF50", fg="white", font=("Helvetica", 12, "bold"))
+button_calculate.pack(pady=20)
+
+# Create and place the result label
+label_result = tk.Label(root, text="INR per BHP is: ", bg="#f0f0f0", font=("Helvetica", 12))
+label_result.pack(pady=20)
+
+# Run the main loop
+root.mainloop()
