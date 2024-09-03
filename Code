@@ -1,13 +1,22 @@
-def get_currency_list():
-    return ['USD', 'EUR', 'GBP', 'JPY', 'INR', 'CNY', 'AUD', 'CAD']
+import locale
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog
 
-def calculate_cost_per_bhp(cost, bhp, units):
+def get_currency_symbol():
+    try:
+        return locale.localeconv()['currency_symbol']
+    except:
+        return '$'  # Default to USD if unable to determine local currency
+
+def calculate_cost_per_bhp(cost, bhp):
     if bhp == 0:
         return "Error: BHP cannot be zero"
-    return (cost / bhp) * units
+    return cost / bhp
 
-def calculate_vehicle_cost(cost_per_bhp, bhp):
-    return cost_per_bhp * bhp
+def calculate_bhp_per_unit_cost(cost, bhp_value):
+    if cost == 0:
+        return "Error: Cost cannot be zero"
+    return bhp_value / cost  # BHP per unit of currency
 
 def get_float_input(prompt):
     while True:
@@ -16,38 +25,135 @@ def get_float_input(prompt):
         except ValueError:
             print("Please enter a valid number.")
 
-def main():
-    print("Vehicle Cost Calculator")
-    print("1. Calculate Cost per BHP")
-    print("2. Calculate Vehicle Cost")
-    choice = input("Enter your choice (1 or 2): ")
+currency_symbol = get_currency_symbol()
 
-    if choice == '1':
-        vehicle_type = input("Vehicle Type: ")
-        name = input("Name: ")
-        make = input("Make: ")
-        cost = get_float_input("Cost: ")
-        currency = input("Currency: ")
-        bhp = get_float_input("BHP: ")
-        units = int(input("Units (1, 100, 1000, 10000, 100000): "))
+def get_currency_list():
+    # This is a simplified list. In a real application, you'd want a more comprehensive list.
+    return ['USD', 'EUR', 'GBP', 'JPY', 'INR', 'CNY', 'AUD', 'CAD']
 
-        result = calculate_cost_per_bhp(cost, bhp, units)
+def calculate_vehicle_cost(cost_per_bhp, bhp):
+    return cost_per_bhp * bhp
+
+def get_vehicle_emoji(vehicle_type):
+    emoji_dict = {
+        'Electric Scooter': '🛴',
+        'Car': '🚗',
+        'Motorcycle': '🏍️',
+        'Truck': '🚚',
+        'Spaceship': '🚀'
+    }
+    return emoji_dict.get(vehicle_type, '🚗')
+
+def get_currency_emoji(currency):
+    emoji_dict = {
+        'USD': '💵',
+        'EUR': '💶',
+        'GBP': '💷',
+        'JPY': '💴',
+        'INR': '₹',
+        'CNY': '¥',
+        'AUD': '🦘',
+        'CAD': '🍁'
+    }
+    return emoji_dict.get(currency, '💰')
+
+def option_1():
+    try:
+        vehicle_type = vehicle_type_var.get()
+        name = name_entry.get()
+        make = make_var.get()
+        cost = float(cost_entry.get())
+        currency = currency_var.get()
+        bhp = float(bhp_entry.get())
+
+        result = calculate_cost_per_bhp(cost, bhp)
         
         if isinstance(result, str):
-            print("Error:", result)
+            messagebox.showerror("Error", result)
         else:
-            print(f"The cost per BHP for your {vehicle_type} ({name} {make}) is: {result:.2f} {currency} per {units} units")
+            share = messagebox.askyesno("Share Results", "Would you like to share your cost per BHP with other users?")
+            vehicle_emoji = get_vehicle_emoji(vehicle_type)
+            currency_emoji = get_currency_emoji(currency)
+            if share:
+                messagebox.showinfo("Result", f"Thank you for sharing! The cost per BHP for your {vehicle_type} ({name} {make}) is: {result:.2f} {currency} per 1 BHP {vehicle_emoji}{currency_emoji}")
+            else:
+                messagebox.showinfo("Result", f"No worries! Here's your awesome result: Your {vehicle_type} is rocking a cool {result:.2f} {currency} per 1 BHP! {vehicle_emoji}{currency_emoji}")
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values for cost and BHP.")
 
-    elif choice == '2':
-        cost_per_bhp = get_float_input("Cost per BHP: ")
-        bhp = get_float_input("BHP: ")
-        currency = input("Currency: ")
+def option_2():
+    try:
+        cost_per_bhp = float(cost_per_bhp_entry.get())
+        bhp = float(bhp_entry_2.get())
+        currency = currency_var_2.get()
 
         result = calculate_vehicle_cost(cost_per_bhp, bhp)
-        print(f"The estimated cost of the vehicle is: {result:.2f} {currency}")
-
-    else:
-        print("Invalid choice. Please run the program again and select 1 or 2.")
+        
+        share = messagebox.askyesno("Share Results", "Would you like to share your estimated vehicle cost with other users?")
+        currency_emoji = get_currency_emoji(currency)
+        if share:
+            messagebox.showinfo("Result", f"Thank you for sharing! The estimated cost of the vehicle is: {result:.2f} {currency} {currency_emoji}")
+        else:
+            messagebox.showinfo("Result", f"No worries! Here's your awesome result: Your dream ride is valued at a cool {result:.2f} {currency}! 🏎️💨 {currency_emoji}")
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values for cost per BHP and BHP.")
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    root.title("Vehicle Cost Calculator")
+    root.minsize(400, 300)  # Set minimum window size
+
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill='both', expand=True)
+
+    tab1 = ttk.Frame(notebook)
+    tab2 = ttk.Frame(notebook)
+
+    notebook.add(tab1, text='Calculate Cost per BHP')
+    notebook.add(tab2, text='Calculate Vehicle Cost')
+
+    # Tab 1 content
+    vehicle_types = ['Electric Scooter', 'Car', 'Motorcycle', 'Truck', 'Spaceship']
+    vehicle_type_var = tk.StringVar(value=vehicle_types[0])
+    ttk.Label(tab1, text="Vehicle Type:").pack()
+    ttk.Combobox(tab1, textvariable=vehicle_type_var, values=vehicle_types).pack()
+
+    ttk.Label(tab1, text="Name:").pack()
+    name_entry = ttk.Entry(tab1)
+    name_entry.pack()
+
+    make_years = list(range(1980, 2051))
+    make_var = tk.StringVar(value=make_years[0])
+    ttk.Label(tab1, text="Make (Year):").pack()
+    ttk.Combobox(tab1, textvariable=make_var, values=make_years).pack()
+
+    ttk.Label(tab1, text="Cost:").pack()
+    cost_entry = ttk.Entry(tab1)
+    cost_entry.pack()
+
+    currency_var = tk.StringVar(value=get_currency_list()[0])
+    ttk.Label(tab1, text="Currency:").pack()
+    ttk.Combobox(tab1, textvariable=currency_var, values=get_currency_list()).pack()
+
+    ttk.Label(tab1, text="BHP:").pack()
+    bhp_entry = ttk.Entry(tab1)
+    bhp_entry.pack()
+
+    ttk.Button(tab1, text="Calculate", command=option_1).pack()
+
+    # Tab 2 content
+    ttk.Label(tab2, text="Cost per BHP:").pack()
+    cost_per_bhp_entry = ttk.Entry(tab2)
+    cost_per_bhp_entry.pack()
+
+    ttk.Label(tab2, text="BHP:").pack()
+    bhp_entry_2 = ttk.Entry(tab2)
+    bhp_entry_2.pack()
+
+    currency_var_2 = tk.StringVar(value=get_currency_list()[0])
+    ttk.Label(tab2, text="Currency:").pack()
+    ttk.Combobox(tab2, textvariable=currency_var_2, values=get_currency_list()).pack()
+
+    ttk.Button(tab2, text="Calculate", command=option_2).pack()
+
+    root.mainloop()
