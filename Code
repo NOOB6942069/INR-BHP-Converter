@@ -1,45 +1,53 @@
-import tkinter as tk
-from tkinter import messagebox
+def get_currency_list():
+    return ['USD', 'EUR', 'GBP', 'JPY', 'INR', 'CNY', 'AUD', 'CAD']
 
-def calculate_inr_per_bhp():
-    try:
-        cost_in_inr = float(entry_cost.get()) * 100000  # converting lakhs to INR
-        bhp = float(entry_bhp.get())
-        if bhp == 0:
-            raise ValueError("BHP cannot be zero")
-        inr_per_bhp = cost_in_inr / bhp
-        label_result.config(text=f"INR per BHP is: {inr_per_bhp:.2f}")
-    except ValueError as e:
-        messagebox.showerror("Input Error", str(e))
+def calculate_cost_per_bhp(cost, bhp, units):
+    if bhp == 0:
+        return "Error: BHP cannot be zero"
+    return (cost / bhp) * units
 
-# Create the main window
-root = tk.Tk()
-root.title("INR/BHP Calculator")
-root.geometry("400x300")
-root.configure(bg="#f0f0f0")
+def calculate_vehicle_cost(cost_per_bhp, bhp):
+    return cost_per_bhp * bhp
 
-# Create and place the cost label and entry
-frame = tk.Frame(root, bg="#f0f0f0")
-frame.pack(pady=20)
+def get_float_input(prompt):
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Please enter a valid number.")
 
-label_cost = tk.Label(frame, text="Enter the cost in INR (in lakhs):", bg="#f0f0f0")
-label_cost.grid(row=0, column=0, padx=10, pady=10, sticky="e")
-entry_cost = tk.Entry(frame)
-entry_cost.grid(row=0, column=1, padx=10, pady=10)
+def main():
+    print("Vehicle Cost Calculator")
+    print("1. Calculate Cost per BHP")
+    print("2. Calculate Vehicle Cost")
+    choice = input("Enter your choice (1 or 2): ")
 
-# Create and place the BHP label and entry
-label_bhp = tk.Label(frame, text="Enter the BHP:", bg="#f0f0f0")
-label_bhp.grid(row=1, column=0, padx=10, pady=10, sticky="e")
-entry_bhp = tk.Entry(frame)
-entry_bhp.grid(row=1, column=1, padx=10, pady=10)
+    if choice == '1':
+        vehicle_type = input("Vehicle Type: ")
+        name = input("Name: ")
+        make = input("Make: ")
+        cost = get_float_input("Cost: ")
+        currency = input("Currency: ")
+        bhp = get_float_input("BHP: ")
+        units = int(input("Units (1, 100, 1000, 10000, 100000): "))
 
-# Create and place the calculate button
-button_calculate = tk.Button(root, text="Calculate", command=calculate_inr_per_bhp, bg="#4CAF50", fg="white", font=("Helvetica", 12, "bold"))
-button_calculate.pack(pady=20)
+        result = calculate_cost_per_bhp(cost, bhp, units)
+        
+        if isinstance(result, str):
+            print("Error:", result)
+        else:
+            print(f"The cost per BHP for your {vehicle_type} ({name} {make}) is: {result:.2f} {currency} per {units} units")
 
-# Create and place the result label
-label_result = tk.Label(root, text="INR per BHP is: ", bg="#f0f0f0", font=("Helvetica", 12))
-label_result.pack(pady=20)
+    elif choice == '2':
+        cost_per_bhp = get_float_input("Cost per BHP: ")
+        bhp = get_float_input("BHP: ")
+        currency = input("Currency: ")
 
-# Run the main loop
-root.mainloop()
+        result = calculate_vehicle_cost(cost_per_bhp, bhp)
+        print(f"The estimated cost of the vehicle is: {result:.2f} {currency}")
+
+    else:
+        print("Invalid choice. Please run the program again and select 1 or 2.")
+
+if __name__ == "__main__":
+    main()
